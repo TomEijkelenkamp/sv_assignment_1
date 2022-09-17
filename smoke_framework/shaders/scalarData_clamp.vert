@@ -20,7 +20,7 @@ void main()
     value = clamp(value_in, clampMin, clampMax);
 
     // Map the range [clampMin, clampMax] to [0, 1].
-    value = clampMin + clampMax; // Remove this placeholder computation
+    value = (value - clampMin) / (clampMax - clampMin);
 
     // Apply transfer function.
     value = pow(value, transferK);

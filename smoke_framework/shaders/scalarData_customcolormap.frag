@@ -9,8 +9,5 @@ out vec4 color;
 
 void main()
 {
-    // As a place holder, always choose the color with index 0.
-    vec3 colorFromColorMap = colorMapColors[0] * value; // Remove this placeholder value
-
-    color = vec4(colorFromColorMap, 1.0F);
+    color = vec4(colorMapColors[int(min(2, value * 3))], 1.0F);
 }

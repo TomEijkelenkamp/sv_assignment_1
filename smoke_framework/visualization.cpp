@@ -258,9 +258,27 @@ void Visualization::applyQuantization(std::vector<float> &scalarValues) const
     // Apply quantization to std::vector<unsigned int> image here.
     // The variable m_quantizationBits ('n' in the lecture slides) is set in the GUI and can be used here.
     // L needs to be set to the appropriate value and will be used to set the clamping range in the GUI.
+    int block_size = 1;
+    switch (m_quantizationBits) {
+        case 1:
+            block_size = 128;
+            break;
+        case 2:
+            block_size = 64;
+            break;
+        case 4:
+            block_size = 16;
+            break;
+        case 8:
+            block_size = 1;
+            break;
+    }
 
-    unsigned int const L = 1U; // placeholder value
-    qDebug() << "Quantization not implemented";
+    for (size_t i=0U; i<image.size(); i++) {
+        image[i] = round(image[i] / block_size);
+    }
+
+    unsigned int const L = unsigned(256 / block_size) - 1; // placeholder value
 
     // Convert the image's data back to floating point values, so that it can be processed as usual.
     scalarValues = std::vector<float>{image.cbegin(), image.cend()};
