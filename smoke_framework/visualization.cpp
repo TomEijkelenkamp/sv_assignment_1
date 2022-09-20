@@ -20,6 +20,8 @@ Visualization::Visualization(QWidget *parent) : QOpenGLWidget(parent)
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(do_one_simulation_step()));
 
     m_elapsedTimer.start();
+
+    std::fill(m_scalarCube.begin(), m_scalarCube.end(), std::vector<float>(m_DIM * m_DIM, 0.0F));
 }
 
 Visualization::~Visualization()
@@ -243,6 +245,7 @@ void Visualization::drawGlyphs()
 }
 
 
+
 void Visualization::applyQuantization(std::vector<float> &scalarValues) const
 {
     // Convert the floating point values to (8 bit) unsigned integers,
@@ -290,13 +293,67 @@ void Visualization::applyQuantization(std::vector<float> &scalarValues) const
     mainWindowPtr->on_scalarDataMappingClampingMaxSlider_valueChanged(100 * static_cast<int>(L));
 }
 
+std::vector<float> Visualization::applyKernel(std::vector<std::vector<float>> kernel, std::vector<float> image) const
+{
+    std::vector<float> newImage(m_DIM*m_DIM, 0.0F);
+    int count;
+
+    for (size_t x=0U; x<m_DIM; x++)
+    {
+        for (size_t y=0U; y<m_DIM; y++)
+        {
+            count = 0;
+
+            if (x>0 && y>0) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y-1] * kernel[0][0];
+                count++;
+            }
+            if (x>0 ) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y]   * kernel[0][1];
+                count++;
+            }
+            if (x>0 && y<m_DIM-1) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y+1] * kernel[0][2];
+                count++;
+            }
+            if (y>0) {
+                newImage[m_DIM*x+y] += image[m_DIM*x+y-1]     * kernel[1][0];
+                count++;
+            }
+            if (1) {
+                newImage[m_DIM*x+y] += image[m_DIM*x+y]       * kernel[1][1];
+                count++;
+            }
+            if (y<m_DIM-1) {
+                newImage[m_DIM*x+y] += image[m_DIM*x+y+1]     * kernel[1][2];
+                count++;
+            }
+            if (x<m_DIM-1 && y>0) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x+1)+y-1] * kernel[2][0];
+                count++;
+            }
+            if (x<m_DIM-1) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x+1)+y]   * kernel[2][1];
+                count++;
+            }
+            if (x<m_DIM-1 && y<m_DIM-1) {
+                newImage[m_DIM*x+y] += image[m_DIM*(x+1)+y+1] * kernel[2][2];
+                count++;
+            }
+
+            newImage[m_DIM*x+y] /= count;
+        }
+    }
+
+    return newImage;
+}
+
 void Visualization::applyGaussianBlur(std::vector<float> &scalarValues) const
 {
-    // Implement Gaussian blur here, applied on the values of the scalarValues container.
-    // First, define a 3x3 matrix for the kernel.
-    // (Use a C-style 2D array, a std::array of std::array's, or a std::vector of std::vectors)
+    std::vector<float> NewImageX(m_DIM*m_DIM);
+    std::vector<std::vector<float>> kernel = {{ 1, 2, 1 },{ 2, 4, 2 },{ 1, 2, 1 }};
 
-    qDebug() << "Gaussian blur not implemented";
+    scalarValues = applyKernel(kernel, scalarValues);
 }
 
 void Visualization::applyGradients(std::vector<float> &scalarValues) const
@@ -309,7 +366,15 @@ void Visualization::applyGradients(std::vector<float> &scalarValues) const
     // Calculate the Gradient direction
     // Visualize the Gradient magnitude
 
-    qDebug() << "applyGradients not implemented";
+    std::vector<std::vector<float>> xKernel = {{ 1, 0, -1 },{ 2, 0, -2 },{ 1, 0, -1 }};
+    std::vector<std::vector<float>> yKernel = {{ 1, 2, 1 },{ 0, 0, 0 },{ -1, -2, -1 }};
+
+    std::vector<float> xDir = applyKernel(xKernel, scalarValues);
+    std::vector<float> yDir = applyKernel(yKernel, scalarValues);
+
+    for (size_t i=1U; i<m_DIM*m_DIM; i++) {
+        scalarValues[i] = sqrt(xDir[i]*xDir[i] + yDir[i]*yDir[i]);
+    }
 }
 
 /* This function receives a *reference* to a std::vector<float>,
@@ -327,26 +392,48 @@ void Visualization::applyGradients(std::vector<float> &scalarValues) const
  */
 void Visualization::applySlicing(std::vector<float> &scalarValues)
 {
-    qDebug() << "Slicing not implemented";
-    // Add code here and below to complete the implementation
+    // Shift space slices back in time, starting at end
+    for (size_t t=m_DIM-1; t>0; t--) {
+        m_scalarCube[t] = m_scalarCube[t-1];
+    }
+
+    // Add new space slice at begin
+    m_scalarCube[0] = scalarValues;
+
+    // Slice to render
+    std::vector<float> slice;
 
     switch (m_slicingDirection)
     {
     case SlicingDirection::x:
         // xIdx is constant
-        qDebug() << "Slicing in x not implemented";
+        for (int t=0U; t<m_DIM; t++) {
+            for (int y=0U; y<m_DIM; y++) {
+                slice.push_back(m_scalarCube[t][m_sliceIdx*m_DIM + y]);
+            }
+        }
         break;
 
     case SlicingDirection::y:
         // yIdx is constant
-        qDebug() << "Slicing in y not implemented";
+        for (size_t x=0U; x<m_DIM; x++) {
+            for (size_t t=0U; t<m_DIM; t++) {
+                slice.push_back(m_scalarCube[t][x*m_DIM + m_sliceIdx]);
+            }
+        }
         break;
 
     case SlicingDirection::t:
         // t is constant
-        qDebug() << "Slicing in t not implemented";
+        for (size_t x=0U; x<m_DIM; x++) {
+            for (size_t y=0U; y<m_DIM; y++) {
+                slice.push_back(m_scalarCube[m_sliceIdx][x*m_DIM + y]);
+            }
+        }
         break;
     }
+
+    scalarValues = slice;
 }
 
 void Visualization::applyPreprocessing(std::vector<float> &scalarValues)

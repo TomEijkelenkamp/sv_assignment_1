@@ -237,6 +237,8 @@ class Visualization : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     unsigned int m_quantizationBits = 2U;
     void applyQuantization(std::vector<float> &scalarValues) const;
 
+    std::vector<float> applyKernel(std::vector<std::vector<float>> kernel, std::vector<float> image) const;
+
     // Gaussian blur
     bool m_useGaussianBlur = false;
     void applyGaussianBlur(std::vector<float> &scalarValues) const;
@@ -253,6 +255,7 @@ class Visualization : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     SlicingDirection m_slicingDirection = SlicingDirection::x;
     size_t m_sliceIdx = 0U;
     std::deque<std::vector<float>> m_scalarValuesWindow{m_slicingWindowSize, std::vector<float>(m_DIM * m_DIM, 0.0F)};
+    std::vector<std::vector<float>> m_scalarCube{m_DIM, std::vector<float>(m_DIM * m_DIM, 0.0F)};
 
     void applySlicing(std::vector<float> &scalarValues);
 

@@ -1068,7 +1068,7 @@ void Visualization::opengl_drawVolumeRendering()
     m_shaderProgramVolumeRendering.bind();
     std::array<float, 3U> const iResolution{static_cast<float>(width()),
                                             static_cast<float>(height()),
-                                            static_cast<float>(screen()->devicePixelRatio())};
+                                            1.0F};
 
     glUniform3fv(m_uniformLocationVolumeRendering_iResolution, 1, iResolution.data());
     glUniform1f(m_uniformLocationVolumeRendering_iTime, m_elapsedTimer.elapsed() / 1000.0F);
