@@ -501,22 +501,22 @@ void Visualization::opengl_createShaderProgramHeightplotScale()
     m_uniformLocationHeightplotScale_rangeMax = m_shaderProgramHeightplotScale.uniformLocation("rangeMax");
     Q_ASSERT(m_uniformLocationHeightplotScale_rangeMax != -1);
     m_uniformLocationHeightplotScale_transferK = m_shaderProgramHeightplotScale.uniformLocation("transferK");
-    Q_ASSERT(m_uniformLocationHeightplotScale_transferK != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_transferK != -1);
 
     m_uniformLocationHeightplotScale_projection = m_shaderProgramHeightplotScale.uniformLocation("projectionTransform");
     Q_ASSERT(m_uniformLocationHeightplotScale_projection != -1);
     m_uniformLocationHeightplotScale_view = m_shaderProgramHeightplotScale.uniformLocation("viewTransform");
     Q_ASSERT(m_uniformLocationHeightplotScale_view != -1);
     m_uniformLocationHeightplotScale_normal = m_shaderProgramHeightplotScale.uniformLocation("normalTransform");
-    Q_ASSERT(m_uniformLocationHeightplotScale_normal != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_normal != -1);
 
     m_uniformLocationHeightplotScale_material = m_shaderProgramHeightplotScale.uniformLocation("material");
-    Q_ASSERT(m_uniformLocationHeightplotScale_material != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_material != -1);
     m_uniformLocationHeightplotScale_light = m_shaderProgramHeightplotScale.uniformLocation("lightPosition");
-    Q_ASSERT(m_uniformLocationHeightplotScale_light != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_light != -1);
 
     m_uniformLocationHeightplotScale_texture = m_shaderProgramHeightplotScale.uniformLocation("textureSampler");
-    Q_ASSERT(m_uniformLocationHeightplotScale_texture != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_texture != -1);
 
     qDebug() << "m_shaderProgramHeightplotScale initialized.";
 }
@@ -528,26 +528,26 @@ void Visualization::opengl_createShaderProgramHeightplotClamp()
     m_shaderProgramHeightplotClamp.link();
 
     m_uniformLocationHeightplotClamp_clampMin = m_shaderProgramHeightplotClamp.uniformLocation("clampMin");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_clampMin != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_clampMin != -1);
     m_uniformLocationHeightplotClamp_clampMax = m_shaderProgramHeightplotClamp.uniformLocation("clampMax");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_clampMax != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_clampMax != -1);
     m_uniformLocationHeightplotClamp_transferK = m_shaderProgramHeightplotClamp.uniformLocation("transferK");
-    Q_ASSERT(m_uniformLocationHeightplotScale_transferK != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotScale_transferK != -1);
 
     m_uniformLocationHeightplotClamp_projection = m_shaderProgramHeightplotClamp.uniformLocation("projectionTransform");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_projection != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_projection != -1);
     m_uniformLocationHeightplotClamp_view = m_shaderProgramHeightplotClamp.uniformLocation("viewTransform");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_view != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_view != -1);
     m_uniformLocationHeightplotClamp_normal = m_shaderProgramHeightplotClamp.uniformLocation("normalTransform");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_normal != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_normal != -1);
 
     m_uniformLocationHeightplotClamp_material = m_shaderProgramHeightplotClamp.uniformLocation("material");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_material != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_material != -1);
     m_uniformLocationHeightplotClamp_light = m_shaderProgramHeightplotClamp.uniformLocation("lightPosition");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_light != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_light != -1);
 
     m_uniformLocationHeightplotClamp_texture = m_shaderProgramHeightplotClamp.uniformLocation("textureSampler");
-    Q_ASSERT(m_uniformLocationHeightplotClamp_texture != -1);
+//    Q_ASSERT(m_uniformLocationHeightplotClamp_texture != -1);
 
     qDebug() << "m_shaderProgramHeightplotClamp initialized.";
 }

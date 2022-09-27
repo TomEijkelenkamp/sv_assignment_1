@@ -26,10 +26,20 @@ uniform vec3 lightPosition;
 
 void main()
 {
+    // Clamp height
+    value = clamp(height, clampMin, clampMax);
+
     gl_Position = viewTransform * projectionTransform * vec4(vertCoordinates_in, height, 1.0F);
 
-    // Placeholder values
-    value = clampMin + clampMax;
-    shading = transferK + material.x + lightPosition.x;
-    heightChange = normalTransform[0][0];
+    vec3 relativeViewPosition = vec4(viewTransform * vec4(0.0F, 1.0F)).xyz;
+    vec3 relativePosition = vec4(viewTransform * vec4(vertCoordinates_in, height, 1.0F)).xyz;
+    vec3 relativeLightPosition = vec4(viewTransform * lightPosition).xyz;
+
+    vec3 N = normalize(normalTransform * vertNormals_in);
+    vec3 L = normalize(relativeLightPosition - relativePosition);
+    vec3 R = 2*dot(L, N)*N - L;
+    vec3 V = normalize(relativeViewPosition - relativePosition);
+
+    shading = material[0] + material[1]*max(dot(N, L), 0.0F) + material[2]*pow(max(dot(R, V), 0.0F), material[3]);
+    heightChange = length(vertNormals_in.xy);
 }

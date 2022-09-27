@@ -281,7 +281,7 @@ void Visualization::applyQuantization(std::vector<float> &scalarValues) const
         image[i] = round(image[i] / block_size);
     }
 
-    unsigned int const L = unsigned(256 / block_size) - 1; // placeholder value
+    unsigned int const L = unsigned(256 / block_size) - 1;
 
     // Convert the image's data back to floating point values, so that it can be processed as usual.
     scalarValues = std::vector<float>{image.cbegin(), image.cend()};
@@ -308,7 +308,7 @@ std::vector<float> Visualization::applyKernel(std::vector<std::vector<float>> ke
                 newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y-1] * kernel[0][0];
                 count++;
             }
-            if (x>0 ) {
+            if (x>0) {
                 newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y]   * kernel[0][1];
                 count++;
             }
@@ -544,7 +544,20 @@ std::vector<float> Visualization::forceFieldDivergence() const
 
 std::vector<QVector3D> Visualization::computeNormals(std::vector<float> heights) const
 {
-    return std::vector<QVector3D>(heights.size(), QVector3D(0,0,1));
+    std::vector<QVector3D> normals(heights.size(), QVector3D(0,0,1));
+
+    for (size_t y = 1U; y<m_DIM-1; y++)
+    {
+        for (size_t x = 1U; x<m_DIM-1; x++)
+        {
+            float sx = (heights[(x+1)*m_DIM + y] - heights[(x-1)*m_DIM + y]) / 2;
+            float sy = (heights[x*m_DIM + (y+1)] - heights[x*m_DIM + (y-1)]) / 2;
+
+            normals[x*m_DIM + y] = QVector3D(sx, sy, 1.0F).normalized();
+        }
+    }
+
+    return normals;
 }
 
 void Visualization::onMessageLogged(QOpenGLDebugMessage const &Message) const
