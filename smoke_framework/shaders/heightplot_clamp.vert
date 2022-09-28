@@ -31,15 +31,20 @@ void main()
 
     gl_Position = viewTransform * projectionTransform * vec4(vertCoordinates_in, height, 1.0F);
 
-    vec3 relativeViewPosition = vec4(viewTransform * vec4(0.0F, 1.0F)).xyz;
-    vec3 relativePosition = vec4(viewTransform * vec4(vertCoordinates_in, height, 1.0F)).xyz;
-    vec3 relativeLightPosition = vec4(viewTransform * lightPosition).xyz;
+    vec3 viewPosition = vec3(0.0F);
+    vec3 relativeVertexPosition = vec3(viewTransform * vec4(vertCoordinates_in, height, 1.0F));
+    vec3 relativeLightPosition = vec3(viewTransform * vec4(lightPosition, 1.0F));
 
     vec3 N = normalize(normalTransform * vertNormals_in);
-    vec3 L = normalize(relativeLightPosition - relativePosition);
+    vec3 L = normalize(relativeLightPosition - relativeVertexPosition);
     vec3 R = 2*dot(L, N)*N - L;
-    vec3 V = normalize(relativeViewPosition - relativePosition);
+    vec3 V = normalize(viewPosition - relativeVertexPosition);
 
-    shading = material[0] + material[1]*max(dot(N, L), 0.0F) + material[2]*pow(max(dot(R, V), 0.0F), material[3]);
+    shading  = material[0];
+    shading += material[1] * max(dot(N, L), 0.0F);
+    shading += material[2] * pow(max(dot(R, V), 0.0F), material[3]);
+
     heightChange = length(vertNormals_in.xy);
 }
+
+

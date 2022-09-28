@@ -11,8 +11,10 @@ out vec4 color;
 
 void main()
 {
-    // TODO:
-    // - Use the height value to obtain the correct color from the color map.
-    // - Use the height change variable to show areas of low change in gray, but areas of large change in color (use linear interpolation).
-    color = vec4(0.3F, 0.3F, 0.3F, 1.0F) * (1 - heightChange) + texture(textureSampler, value) * heightChange;
+    // Grey part scaled by inverse magnitude
+    color  = vec4(0.3F, 0.3F, 0.3F, 1.0F) * (1 - heightChange);
+    // Color part scaled by magnitude
+    color += texture(textureSampler, value) * heightChange;
+    // Add shading
+    color *= shading;
 }
