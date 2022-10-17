@@ -301,6 +301,8 @@ class Visualization : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     SlicingDirection m_slicingDirection = SlicingDirection::x;
     size_t m_sliceIdx = 0U;
     std::deque<std::vector<float>> m_scalarValuesWindow{m_slicingWindowSize, std::vector<float>(m_DIM * m_DIM, 0.0F)};
+    std::vector<std::vector<float>> m_scalarCube{m_DIM, std::vector<float>(m_DIM * m_DIM, 0.0F)};
+
 
     void applySlicing(std::vector<float> &scalarValues);
 
