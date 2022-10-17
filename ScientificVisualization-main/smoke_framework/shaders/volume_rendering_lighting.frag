@@ -4,8 +4,8 @@
 // TODO If you want to change from central to intermediate differences, do it here by commenting/uncommenting
 // the corresponding define
 //#define USE_SOBEL
-//#define USE_CENTRAL
-#define USE_INTERMEDIATE
+#define USE_CENTRAL
+//#define USE_INTERMEDIATE
 
 in vec2 uv;
 
@@ -50,7 +50,7 @@ const int sampleNum = 256;
 const float voxelWidth = 1.0 / 64.0;
 
 // epsilon for comparisons
-const float EPS = 0.0000001;
+const float EPS = 0.000001;
 
 /**
  *	Returns whether a given point is inside a given sphere.
@@ -143,7 +143,7 @@ vec4 transferFunction(float value)
  *
  * 	@param rayOrig The origin of the ray
  * 	@param rayDir The direction of the ray
- *  @param tNear OUT: The distance from the ray origin to the first intersection point
+ *      @param tNear OUT: The distance from the ray origin to the first intersection point
  *	@param tFar OUT: The distance from the ray origin to the second intersection point
  *	@return True if the ray intersects the bounding box, false otherwise.
  */
@@ -174,7 +174,16 @@ vec3 gradientCentral(vec3 pos)
 {
     vec3 result;
     //TODO: Insert codes here
-    return result;
+
+    //          f(xi+1) − f(xi−1)
+    // f′(x) = _________________
+    //               2Δx
+
+    result.x =  sampleVolume(pos.x+voxelWidth) - sampleVolume(pos.x-voxelWidth) / 2*voxelWidth ;
+    result.y =  sampleVolume(pos.y+voxelWidth) - sampleVolume(pos.y-voxelWidth) / 2*voxelWidth ;
+    result.z =  sampleVolume(pos.z+voxelWidth) - sampleVolume(pos.z-voxelWidth) / 2*voxelWidth ;
+
+   return result;
 }
 
 /**
@@ -187,6 +196,16 @@ vec3 gradientIntermediate(vec3 pos)
 {
     vec3 result;
     //TODO: Insert codes here
+
+    //       f′(x) =     f(xi+1) − f(xi)
+    //                  _________________
+    //                          Δx
+
+    result.x = sampleVolume( sampleVolume(pos.x+voxelWidth) - sampleVolume(pos.x) / voxelWidth );
+    result.y = sampleVolume( sampleVolume(pos.y+voxelWidth) - sampleVolume(pos.y) / voxelWidth );
+    result.z = sampleVolume( sampleVolume(pos.z+voxelWidth) - sampleVolume(pos.z) / voxelWidth );
+
+
     return result;
 }
 
@@ -202,8 +221,15 @@ vec3 gradientIntermediate(vec3 pos)
 vec4 lighting(vec4 diffuseColor, vec3 normal, vec3 eyeDir)
 {
     // TODO Insert code here
+    //Itotal = IL ⋅ (ka + kd ⋅ (N ⋅ L) + ks ⋅ (H ⋅ V)//α)
+
+    color = diffuseColor *((((lightColor*ka)+kd) * ( normalize(normal)* normalize(lightDir)) +(specularColor*ks) *(eyeDir)^exponent));
+
     vec4 color = diffuseColor;
     return color;
+   // What he said is get H={\frac {L+V}{\left\|L+V\right\|}}
+   // from the blingphong illumination page replace this with R from the phong illumination wikipedia page
+
 }
 
 /**
@@ -243,6 +269,7 @@ void mainImage(out vec4 fragColor)
     /******************* test against bounding box ********************/
     float tNear, tFar;
     bool hit = intersectBoundingBox(camPos, rayDir, tNear, tFar);
+    // vec4 background = vec4(1.0);
     vec4 background = vec4(0.0F, 0.0F, 0.0F, 1.0F);
     if(tNear < 0.0)
         tNear = 0.0;
