@@ -8,11 +8,9 @@
 #include <optional>
 #include <vector>
 
-using namespace std::placeholders;
 
 class Isoline
 {
-
 public:
     enum class AmbiguousCaseDecider
     {
@@ -29,6 +27,7 @@ private:
     QVector2D const m_vertex0;
     Isoline::AmbiguousCaseDecider const m_ambiguousCaseDecider;
 
+
 public:
     enum class InterpolationMethod
     {
@@ -44,6 +43,10 @@ public:
             AmbiguousCaseDecider const ACG);
 
     std::vector<QVector2D> vertices() const;
+    int checkC(float point,float c) const;
+    //float Interpolate(float x1,float y1,float x2,float y2,QString  coordinate) const;
+    float Interpolate(float l1,float l2,float f1,float f2,float c) const;
+
 };
 
 #endif // ISOLINE_H

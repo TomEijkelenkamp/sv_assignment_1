@@ -220,18 +220,11 @@ void Simulation::do_one_simulation_step()
     diffuse_matter();
 }
 
-void Simulation::loadData(std::vector<float> &scalarValues) const
-{
-    qDebug() << "Loading data not implemented";
-}
 
 // Getters
-
-// Unfortunately, copying is necessary to consistently export std::vector<float> vectors,
-// without the custom allocator.
 std::vector<float> Simulation::density() const
 {
-    return std::vector<float>{m_rho.cbegin(), m_rho.cend()};
+    return m_rho;
 }
 
 std::vector<float> Simulation::densityInterpolated(size_t const numberOfRows, size_t const numberOfColumns) const

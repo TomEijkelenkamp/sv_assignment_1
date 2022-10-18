@@ -62,7 +62,6 @@ void Visualization::initializeGL() {
 
     glClearColor(0.2F, 0.1F, 0.2F, 1.0F);
 
-
     // Retrieve default textures.
     auto const mainWindowPtr = qobject_cast<MainWindow*>(parent()->parent());
     std::vector<Color> const defaultScalarDataColorMap = mainWindowPtr->m_defaultScalarDataColorMap;
@@ -212,7 +211,7 @@ void Visualization::drawGlyphs()
      */
     modelTransformationMatrices = std::vector<float>(numberOfInstances * 16U, 0.0F); // Remove this placeholder initialization
 
-
+    // TODO: This shouldn't be here, but otherwise re-binding an already bound Glyphs VAO causes glitches.
     glBindVertexArray(0);
 
     // Buffering section starts here.
@@ -243,7 +242,6 @@ void Visualization::drawGlyphs()
                                 reinterpret_cast<GLvoid*>(0),
                                 static_cast<GLsizei>(numberOfInstances));
 }
-
 
 
 void Visualization::applyQuantization(std::vector<float> &scalarValues) const
@@ -281,7 +279,9 @@ void Visualization::applyQuantization(std::vector<float> &scalarValues) const
         image[i] = round(image[i] / block_size);
     }
 
-    unsigned int const L = unsigned(256 / block_size) - 1; // placeholder value
+    unsigned int const L = unsigned(256 / block_size) - 1;
+
+    qDebug() << "Quantization not implemented";
 
     // Convert the image's data back to floating point values, so that it can be processed as usual.
     scalarValues = std::vector<float>{image.cbegin(), image.cend()};
@@ -308,7 +308,7 @@ std::vector<float> Visualization::applyKernel(std::vector<std::vector<float>> ke
                 newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y-1] * kernel[0][0];
                 count++;
             }
-            if (x>0 ) {
+            if (x>0) {
                 newImage[m_DIM*x+y] += image[m_DIM*(x-1)+y]   * kernel[0][1];
                 count++;
             }
@@ -544,7 +544,79 @@ std::vector<float> Visualization::forceFieldDivergence() const
 
 std::vector<QVector3D> Visualization::computeNormals(std::vector<float> heights) const
 {
-    return std::vector<QVector3D>(heights.size(), QVector3D(0,0,1));
+    std::vector<QVector3D> normals(heights.size(), QVector3D(0,0,1));
+
+    for (size_t y = 1U; y<m_DIM-1; y++)
+    {
+        for (size_t x = 1U; x<m_DIM-1; x++)
+        {
+            float sx = (heights[(x+1)*m_DIM + y] - heights[(x-1)*m_DIM + y]) / 2;
+            float sy = (heights[x*m_DIM + (y+1)] - heights[x*m_DIM + (y-1)]) / 2;
+
+            normals[x*m_DIM + y] = QVector3D(sx, sy, 1.0F).normalized();
+        }
+    }
+
+    return normals;
+}
+
+static QVector4D transferFunction(float value)
+{
+    // Define colors for the colormap
+    QVector3D const colorNode0{0.0F, 0.0F, 1.0F}; // blue
+    // QVector3D const colorNode1{1.0F, 1.0F, 1.0F}; // white
+     QVector3D const colorNode1{0.0F, 1.0F, 0.0F}; // green
+    QVector3D const colorNode2{1.0F, 0.0F, 0.0F}; // red
+
+    value /= 255.0F; // to range [0...1]
+
+    float alpha = value * 0.5F; // value;
+    if (value < 0.2F)
+        alpha = 0.5F; // 0.0F;
+
+
+    QVector3D color0 = colorNode0;
+    QVector3D color1 = colorNode1;
+
+    float t = 0.0F;
+    if (value < 0.5F)
+    {
+        t = 2.0F * value;
+    }
+    else
+    {
+        t = 2.0F * (value - 0.5F);
+        color0 = colorNode1;
+        color1 = colorNode2;
+    }
+
+    QVector4D color;
+
+    color[3U] = alpha;
+
+    for (size_t idx = 0U; idx < 3U; ++idx) // rgb
+        color[idx] = color0[idx] * (1.0F - t) + color1[idx] * t;
+
+    return color;
+}
+
+static float opacityCorrection(float const alpha, float const sampleRatio)
+{
+     return 1.0F - std::pow(1.0F - alpha, sampleRatio);
+}
+
+std::vector<QVector4D> Visualization::computePreIntegrationLookupTable(size_t const DIM) const
+{
+    float const L = 100.0F; // total number of steps from 0 to delta-t
+
+    // TODO: modify the transferFunction and add necessary functions
+
+    // placeholder values
+    std::vector<QVector4D> lookupTable;
+    for (size_t idx = 0U; idx < DIM * DIM; ++idx)
+        lookupTable.push_back({0.5F, 0.5F, 0.5F, 1.0F});
+
+    return lookupTable;
 }
 
 void Visualization::onMessageLogged(QOpenGLDebugMessage const &Message) const

@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-void MainWindow::on_showMinMaxDataCheckBox_toggled(bool checked)
+void MainWindow::on_simulationShowMinMaxDataCheckBox_toggled(bool checked)
 {
     auto const visualizationPtr = findChildSafe<Visualization*>("visualizationOpenGLWidget");
     visualizationPtr->m_sendMinMaxToUI = checked;
@@ -45,13 +45,7 @@ void MainWindow::on_timestepSpinBox_valueChanged(double value)
     visualizationPtr ->m_simulation.setDt(static_cast<float>(value));
 }
 
-void MainWindow::on_pausePlayButton_clicked()
-{
-    auto const visualizationPtr = findChildSafe<Visualization*>("visualizationOpenGLWidget");
-    visualizationPtr->m_isRunning = !(visualizationPtr->m_isRunning);
-}
-
-void MainWindow::on_loadDataButton_clicked()
+void MainWindow::on_simulationPausePlayPushButton_clicked()
 {
     auto const visualizationPtr = findChildSafe<Visualization*>("visualizationOpenGLWidget");
     visualizationPtr->m_isRunning = !(visualizationPtr->m_isRunning);

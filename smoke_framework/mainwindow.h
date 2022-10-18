@@ -24,7 +24,7 @@ public:
 
 private slots:
     // Simulation, show minimum/maximum values of scalar and vector data.
-    void on_showMinMaxDataCheckBox_toggled(bool checked);
+    void on_simulationShowMinMaxDataCheckBox_toggled(bool checked);
 
     // Simulation, density injected fluid.
     void on_densitySlider_valueChanged(int value);
@@ -42,10 +42,7 @@ private slots:
     void on_gridpointsSpinBox_valueChanged(int value);
 
     // Simulation, run simulation.
-    void on_pausePlayButton_clicked();
-
-    // Simulation, load data.
-    void on_loadDataButton_clicked();
+    void on_simulationPausePlayPushButton_clicked();
 
     // Visualization, projection.
     void on_visualizationProjectionOrthographicRadioButton_toggled(bool checked);
@@ -54,7 +51,6 @@ private slots:
     // Preprocessing
     void on_quantizationCheckBox_toggled(bool checked);
     void on_quantizationBitsComboBox_currentIndexChanged(int index);
-
     void on_gaussianBlurCheckBox_toggled(bool checked);
     void on_gradientsCheckBox_toggled(bool checked);
 
@@ -171,6 +167,16 @@ private slots:
 
     // Volume rendering, draw on/off.
     void on_drawVolumeRenderingCheckBox_toggled(bool checked);
+    void on_timeStepVolumeRenderingGroupBoxSpinBox_valueChanged(int arg1);
+    void on_volumeRenderingSyntheticCubeRadioButton_toggled(bool checked);
+    void on_volumeRenderingSyntheticSceneRadioButton_toggled(bool checked);
+    void on_volumeRenderingDataRawRadioButton_toggled(bool checked);
+    void on_volumeRenderingSelectDatFilePushButton_clicked();
+    void on_volumeRenderingFragmentShaderSelectionVolumenRenderingRadioButton_clicked();
+    void on_volumeRenderingFragmentShaderSelectionVolumetricLightingRadioButton_clicked();
+    void on_volumeRenderingFragmentShaderSelectionVolumeRenderingPreIntegrationRadioButton_clicked();
+    void on_volumeRenderingFragmentShaderSelectionVolumeRenderingOverlayRenderingRadioButton_clicked();
+    void on_volumeRenderingPausePlayPushButton_clicked();
 
     // Setters
     void setScalarDataMin(float const min);
