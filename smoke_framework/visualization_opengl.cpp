@@ -619,10 +619,10 @@ void Visualization::opengl_createShaderProgramVolumeRenderingLighting()
     m_shaderProgramVolumeRenderingLighting.link();
 
     m_uniformLocationVolumeRendering_iTimeLighting = m_shaderProgramVolumeRenderingLighting.uniformLocation("iTime");
-    Q_ASSERT(m_uniformLocationVolumeRendering_iTimeLighting != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRendering_iTimeLighting != -1);
 
     m_uniformLocationVolumeRendering_iResolutionLighting = m_shaderProgramVolumeRenderingLighting.uniformLocation("iResolution");
-    Q_ASSERT(m_uniformLocationVolumeRendering_iResolutionLighting != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRendering_iResolutionLighting != -1);
 
     /*
     m_uniformLocationVolumeRenderingTextureLighting = m_shaderProgramVolumeRenderingLighting.uniformLocation("textureSampler");
