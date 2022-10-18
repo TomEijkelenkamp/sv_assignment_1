@@ -1,8 +1,6 @@
 #version 330 core
 // Volume rendering fragment shader
 
-#define USE_INTERMEDIATE
-
 in vec2 uv;
 
 uniform vec2 iResolution;
@@ -11,53 +9,57 @@ uniform sampler3D textureSampler;
 
 out vec4 color;
 
-// bounding box
-const vec3 bbMin = vec3(-0.5F, -0.5F, -0.5F);
-const vec3 bbMax = vec3(0.5F, 0.5F, 0.5F);
+// Bounding box
+const vec3 bbMin = vec3(-0.5, -0.5, -0.5);
+const vec3 bbMax = vec3(0.5, 0.5, 0.5);
 
-// additional camera parameters
-const float fovy = 45.0F;
-const float zNear = 0.1F;
+// Additional camera parameters
+const float fovy = 45.0;
+const float zNear = 0.1;
 
-// light direction
-const vec3 lightDir = vec3(1.0, 1.0, 1.0);
+// Light direction
+const vec3 lightDir = vec3(0.0, -1.0, -1.0);
 
-const vec4 lightColor = vec4(1.0F);
-const vec4 specularColor = vec4(1.0F);
-const float ka = 0.5F;  // ambient contribution
-const float kd = 0.5F;  // diffuse contribution
-const float ks = 0.7F;  // specular contribution
-const float exponent = 50.0F;  // specular exponent (shininess)
+const vec4 lightColor = vec4(1);
+const vec4 specularColor = vec4(1);
+const float ka = 0.5;  // ambient contribution
+const float kd = 0.5;  // diffuse contribution
+const float ks = 0.7;  // specular contribution
+const float exponent = 50.0;  // specular exponent (shininess)
 
-// number of maximum raycasting samples per ray
+// Number of maximum raycasting samples per ray
 const int sampleNum = 150;
 
-// width of one voxel
-const float voxelWidth = 1.0F / 64.0F;
+// Width of one voxel
+const float voxelWidth = 1.0 / 64.0;
 
-// epsilon for comparisons
-const float EPS = 0.000001F;
-const float PI = 3.14159267F;
-const float period = 2.0F;
-// sigma for the gaussian function
-const float sig = 0.4F;
+// Epsilon for comparisons
+const float EPS = 0.000001;
+const float PI = 3.14159267;
+const float period = 2.0;
+// Sigma for the gaussian function
+const float sig = 0.4;
 
 // Colors for the colormap
-const vec3 colorNode0 = vec3(0.0F, 0.0F, 1.0F);  // blue
-//const vec3 colorNode1 = vec3(1.0F, 1.0F, 1.0F);  // white
-const vec3 colorNode1 = vec3(0.0F, 1.0F, 0.0F);  // green
-const vec3 colorNode2 = vec3(1.0F, 0.0F, 0.0F);  // red
+const vec3 colorNode0 = vec3(0, 0, 1);  // blue
+//const vec3 colorNode1 = vec3(1, 1, 1);  // white
+const vec3 colorNode1 = vec3(0, 1, 0);  // green
+const vec3 colorNode2 = vec3(1, 0, 0);  // red
+
+// Choose technique
+// TODO: set technique
+const int technique = 0; // technique = 0: accumulation, 1: maximum intensity projection, 2: average intensity
 
 vec2 csqr(vec2 a)
 {
-    return vec2((a.x * a.x) - (a.y * a.y), 2.0F * a.x * a.y);
+    return vec2(a.x*a.x - a.y*a.y, 2.*a.x*a.y);
 }
 
 /**
- *	Samples the volume texture at a given position.
+ * Samples the volume texture at a given position.
  *
- *	@param volumeCoord The position one wants to retrieve the sample of (in world coordinates).
- *	@return The sample value at the given position.
+ * @param volumeCoord The position one wants to retrieve the sample of (in world coordinates).
+ * @return The sample value at the given position.
  */
 float sampleVolume(vec3 texCoord)
 {
@@ -65,48 +67,48 @@ float sampleVolume(vec3 texCoord)
 }
 
 /**
- *	Evaluates the transfer function for a given sample value
+ * Evaluates the transfer function for a given sample value
  *
- *	@param value The sample value
- *	@return The color for the given sample value
+ * @param value The sample value
+ * @return The color for the given sample value
  */
 vec4 transferFunction(float value)
 {
-    float alpha = value * 0.5F; // value;
-    if (value < 0.2F)
-        alpha = 0.5F; // 0.0F;
+    float alpha = value * 0.5; // value;
+    if (value < 0.2)
+        alpha = 0.5;
 
-    float t = 0.0F;
+    float t = 0.0;
     vec3 color0 = colorNode0;
     vec3 color1 = colorNode1;
-    if (value < 0.5F)
+    if (value < 0.5)
     {
-        t = 2.0F * value;
+        t = 2.0 * value;
     }
     else
     {
-        t = 2.0F * (value - 0.5F);
+        t = 2.0 * (value - 0.5);
         color0 = colorNode1;
         color1 = colorNode2;
     }
     vec4 color;
     color.a = alpha;
-    color.rgb = color0 * (1.0F - t) + color1 * t;
+    color.rgb = color0 * (1.0 - t) + color1 * t;
     return color;
 }
 
 /**
- *	Intersects a ray with the bounding box and returns the intersection points
+ * Intersects a ray with the bounding box and returns the intersection points
  *
- * 	@param rayOrig The origin of the ray
- * 	@param rayDir The direction of the ray
- *  @param tNear OUT: The distance from the ray origin to the first intersection point
- *	@param tFar OUT: The distance from the ray origin to the second intersection point
- *	@return True if the ray intersects the bounding box, false otherwise.
+ * @param rayOrig The origin of the ray
+ * @param rayDir The direction of the ray
+ * @param tNear OUT: The distance from the ray origin to the first intersection point
+ * @param tFar OUT: The distance from the ray origin to the second intersection point
+ * @return True if the ray intersects the bounding box, false otherwise.
  */
 bool intersectBoundingBox(vec3 rayOrig, vec3 rayDir, out float tNear, out float tFar)
 {
-    vec3 invR = vec3(1.0F) / rayDir;
+    vec3 invR = vec3(1.0) / rayDir;
     vec3 tbot = invR * (bbMin - rayOrig);
     vec3 ttop = invR * (bbMax - rayOrig);
 
@@ -119,50 +121,20 @@ bool intersectBoundingBox(vec3 rayOrig, vec3 rayDir, out float tNear, out float 
     tNear = largestTMin;
     tFar = smallestTMax;
 
-    return smallestTMax > largestTMin;
+    return (smallestTMax > largestTMin);
 }
-
-// *** added functions for lighting along the ray *** //
-
-vec3 gradientCentral(vec3 pos)
-{
-    // TODO: Insert code here
-
-    return vec3(1.0F, 0.0F, 0.0F); // placeholder value
-}
-
-vec3 gradientIntermediate(vec3 pos)
-{
-    // TODO: Insert code here
-
-    return vec3(1.0F, 0.0F, 0.0F); // placeholder value
-}
-
-vec4 lighting(vec4 diffuseColor, vec3 normal, vec3 eyeDir)
-{
-    // TODO: Insert code here
-
-    return vec4(0.5F, 0.5F, 0.5F, 1.0F); // placeholder value
-}
-
-// *** *** //
 
 /**
- *	Correct opacity for the current sampling rate
+ * Correct opacity for the current sampling rate
  *
- *	@param alpha: input opacity.
- *	@param samplingRatio: the ratio between current sampling rate and the original.
-
+ * @param alpha: input opacity.
+ * @param samplingRatio: the ratio between current sampling rate and the original.
  */
 float opacityCorrection(in float alpha, in float samplingRatio)
 {
-    float a_corrected = 1.0F - pow(1.0F - alpha, samplingRatio);
+    float a_corrected = 1.0 - pow(1.0 - alpha, samplingRatio);
     return a_corrected;
 }
-
-// Choose technique
-// TODO: set technique
-const int technique = 0; // technique = 0: accumulation, 1: maximum intensity projection, 2: average intensity
 
 /**
  * Accumulation composition
@@ -177,33 +149,44 @@ void accumulation(float value, float sampleRatio, inout vec4 composedColor)
     color.a = opacityCorrection(color.a, sampleRatio);
 
     // TODO: Implement Front-to-back blending
-    composedColor = vec4(0.5) * value; // placeholder
+    //composedColor = vec4(0.5) * value;
+
+    // TODO: Implement Front-to-back blending
+    //Ci+1 = Ci + (1 − αi). Ccur .αcur
+    composedColor.r = composedColor.r + ( 1 - composedColor.a ) * color.r * color.a;
+    composedColor.g = composedColor.g + ( 1 - composedColor.a ) * color.g * color.a;
+    composedColor.b = composedColor.b + ( 1 - composedColor.a ) * color.b * color.a;
+    //αi+1 = αi + (1 − αi).αcur
+    composedColor.a = composedColor.a  + ( 1 - composedColor.a )* color.a;
+
+    //composedColor = vec4(0.5) * value; // placeholder
 }
 
 /**
  * Maximum Intensity Projection
  *
- * @param sample: current sample value.
- * @param texCoord: texture coordinates of current sample
+ * @param value: current sample value.
  * @param maxIntense: the maximum intensity along the ray (both input and output)
- * @param maxIntenseTexCoord: the texture coordinates of the maximum intensity sample (both input and output)
  */
 void maximumIntensity(float value, inout float maxIntense)
 {
     // TODO: Record maximum intensity along the ray.
+    if (value>maxIntense)
+        maxIntense=value;
 }
 
 /**
  * Average intensity: summing up intensity along a ray
  *
  * @param sample: current sample value.
- * @param texCoord: texture coordinates of current sample
  * @param sumIntense: the summed intensity along the ray (both input and output)
  * @param hitCount: count of ray hits inside the volume (both input and output)
  */
 void sumIntensity(float value, inout float sumIntense, inout int hitCount)
 {
     // TODO: sum up the intensity along the ray.
+    sumIntense+=value;
+    hitCount++;
 }
 
 /**
@@ -288,15 +271,21 @@ void mainImage(out vec4 fragColor)
     // TODO: Determine final color:
     if (technique == 0)
     {
-        // TODO: color for accumulation
+       //finalColor=composedColor;
+       //accumulation(sampleVolume(texCoord),  sampleRatio,  composedColor);
     }
     else if (technique == 1)
     {
-        // TODO: color for max. intensity projection
+        finalColor = transferFunction(maxIntense);
     }
     else if (technique == 2)
     {
         // TODO: color for average intensity
+        finalColor = transferFunction(sumIntense/hitCount);
+
+        //sumIntensity(value, sumIntense, hitCount);
+
+
     }
 
     fragColor.rgb = mix(background.rgb, finalColor.rgb, finalColor.a);
