@@ -220,16 +220,14 @@ vec3 gradientIntermediate(vec3 pos)
  */
 vec4 lighting(vec4 diffuseColor, vec3 normal, vec3 eyeDir)
 {
-    // TODO Insert code here
     //Itotal = IL ⋅ (ka + kd ⋅ (N ⋅ L) + ks ⋅ (H ⋅ V)//α)
+    vec3 halfDir = normalize(eyeDir + lightDir);
 
-    color = diffuseColor *((((lightColor*ka)+kd) * ( normalize(normal)* normalize(lightDir)) +(specularColor*ks) *(eyeDir)^exponent));
+    vec4 ambient = lightColor * ka;
+    vec4 diffuse = diffuseColor * kd * max(dot(normal, lightDir), 0.0);
+    vec4 specular = specularColor * ks * pow(max(dot(halfDir, eyeDir), 0.0), exponent);
 
-    vec4 color = diffuseColor;
-    return color;
-   // What he said is get H={\frac {L+V}{\left\|L+V\right\|}}
-   // from the blingphong illumination page replace this with R from the phong illumination wikipedia page
-
+    return lightColor * (ambient + diffuse + specular);
 }
 
 /**
