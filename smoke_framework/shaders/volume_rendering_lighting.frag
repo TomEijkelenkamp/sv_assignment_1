@@ -4,8 +4,8 @@
 // TODO If you want to change from central to intermediate differences, do it here by commenting/uncommenting
 // the corresponding define
 //#define USE_SOBEL
-#define USE_CENTRAL
-//#define USE_INTERMEDIATE
+//#define USE_CENTRAL
+#define USE_INTERMEDIATE
 
 in vec2 uv;
 
@@ -179,9 +179,9 @@ vec3 gradientCentral(vec3 pos)
     // f′(x) = _________________
     //               2Δx
 
-    result.x =  sampleVolume(pos.x+voxelWidth) - sampleVolume(pos.x-voxelWidth) / 2*voxelWidth ;
-    result.y =  sampleVolume(pos.y+voxelWidth) - sampleVolume(pos.y-voxelWidth) / 2*voxelWidth ;
-    result.z =  sampleVolume(pos.z+voxelWidth) - sampleVolume(pos.z-voxelWidth) / 2*voxelWidth ;
+    result.x =  sampleVolume(pos + vec3(voxelWidth,0,0)) - sampleVolume(pos - vec3(voxelWidth,0,0)) / 2*voxelWidth ;
+    result.y =  sampleVolume(pos + vec3(0,voxelWidth,0)) - sampleVolume(pos - vec3(0,voxelWidth,0)) / 2*voxelWidth ;
+    result.z =  sampleVolume(pos + vec3(0,0,voxelWidth)) - sampleVolume(pos - vec3(0,0,voxelWidth)) / 2*voxelWidth ;
 
    return result;
 }
@@ -201,9 +201,9 @@ vec3 gradientIntermediate(vec3 pos)
     //                  _________________
     //                          Δx
 
-    result.x = sampleVolume( sampleVolume(pos.x+voxelWidth) - sampleVolume(pos.x) / voxelWidth );
-    result.y = sampleVolume( sampleVolume(pos.y+voxelWidth) - sampleVolume(pos.y) / voxelWidth );
-    result.z = sampleVolume( sampleVolume(pos.z+voxelWidth) - sampleVolume(pos.z) / voxelWidth );
+    result.x = sampleVolume((pos + vec3(voxelWidth,0,0) - pos) / voxelWidth );
+    result.y = sampleVolume((pos + vec3(0,voxelWidth,0) - pos) / voxelWidth );
+    result.z = sampleVolume((pos + vec3(0,0,voxelWidth) - pos) / voxelWidth );
 
 
     return result;
@@ -220,14 +220,23 @@ vec3 gradientIntermediate(vec3 pos)
  */
 vec4 lighting(vec4 diffuseColor, vec3 normal, vec3 eyeDir)
 {
-    //Itotal = IL ⋅ (ka + kd ⋅ (N ⋅ L) + ks ⋅ (H ⋅ V)//α)
-    vec3 halfDir = normalize(eyeDir + lightDir);
+    // TODO Insert code here
+    //Itotal = IL ⋅ (ka
+    //             + kd ⋅ (N ⋅ L)
+    //             + ks ⋅ (H ⋅ V)//α)
 
-    vec4 ambient = lightColor * ka;
-    vec4 diffuse = diffuseColor * kd * max(dot(normal, lightDir), 0.0);
-    vec4 specular = specularColor * ks * pow(max(dot(halfDir, eyeDir), 0.0), exponent);
 
-    return lightColor * (ambient + diffuse + specular);
+    vec4 ambiant;
+    vec4 diffuse;
+    vec4 specular;
+
+    ambiant  = lightColor*ka;
+    //ambiant.a=1.0F;
+    diffuse  = (diffuseColor*kd)    * max(dot(normalize(normal), normalize(lightDir)),0.0);
+    specular = (specularColor*ks)   * pow(max(dot(normalize(lightDir+eyeDir),normalize(normal)),0.0) ,exponent);
+    color = diffuseColor * ( ambiant + diffuse + specular );
+
+    return color;
 }
 
 /**
