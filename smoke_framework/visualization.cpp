@@ -610,40 +610,36 @@ std::vector<QVector4D> Visualization::computePreIntegrationLookupTable(size_t co
     float const L = 100.0F; // total number of steps from 0 to delta-t
 
     // TODO: modify the transferFunction and add necessary functions
-    float sb;
-    float sf;
-    QVector3D C(0.0F,0.0F,0.0F,0.0F);
+    QVector3D C{0.0F, 0.0F, 0.0F};
     float O = 0.0F;
     QVector4D c;
     float o;
     float s;
     std::vector<QVector4D> lookupTable;
 
-    for (size_t idx = 0U; idx < DIM * DIM; ++idx) {
+    for (size_t sf = 0U; sf < 256U; sf += 256U / DIM) {
+        for (size_t sb = 0U; sb < 256U; sb += 256U / DIM) {
 
+            C = {0.0F, 0.0F, 0.0F};
+            O = 0.0F;
 
-
-        for (size_t sf = 0U; sf < 1-deltaT; sf += deltaT) {
-            sb = sf + deltaT;
-
-            for (size_t t = 0U; t < deltaT; t += deltaT / L) {
-                s = sb + (t / deltaT) * (sf - sb);
+            for (size_t t = 0U; t < L; t++) {
+                s = sb + (t / L) * (sf - sb);
                 c = transferFunction(s);
-                o = opacityCorrection(ctemp[3], sampleRatio);
+                o = opacityCorrection(c[3], 1/L);
                 C = C + (1 - O) * o * c.toVector3D();
                 O = O + (1 - O) * o;
             }
-
-            lookupTable.push_back({C, O});
+            lookupTable.push_back({C, O} );
         }
 
     }
 
 
-    // placeholder values
-    std::vector<QVector4D> lookupTable;
-    for (size_t idx = 0U; idx < DIM * DIM; ++idx)
-        lookupTable.push_back({0.5F, 0.5F, 0.5F, 1.0F});
+//    // placeholder values
+//    std::vector<QVector4D> lookupTable;
+//    for (size_t idx = 0U; idx < DIM * DIM; ++idx)
+//        lookupTable.push_back({0.5F, 0.5F, 0.5F, 1.0F});
 
     return lookupTable;
 }

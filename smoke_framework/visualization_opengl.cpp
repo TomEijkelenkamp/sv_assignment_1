@@ -641,16 +641,16 @@ void Visualization::opengl_createShaderProgramVolumeRenderingPreIntegration()
     m_shaderProgramVolumeRenderingPreIntegration.link();
 
     m_uniformLocationVolumeRenderingPreIntegration_iTime = m_shaderProgramVolumeRenderingPreIntegration.uniformLocation("iTime");
-    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegration_iTime != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegration_iTime != -1);
 
     m_uniformLocationVolumeRenderingPreIntegration_iResolution = m_shaderProgramVolumeRenderingPreIntegration.uniformLocation("iResolution");
-    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegration_iResolution != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegration_iResolution != -1);
 
     m_uniformLocationVolumeRenderingPreIntegrationTexture = m_shaderProgramVolumeRenderingPreIntegration.uniformLocation("textureSampler");
-    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegrationTexture != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegrationTexture != -1);
 
     m_uniformLocationVolumeRenderingPreIntegrationTextureLookupTable = m_shaderProgramVolumeRenderingPreIntegration.uniformLocation("lookupTable");
-    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegrationTextureLookupTable != -1);
+//    Q_ASSERT(m_uniformLocationVolumeRenderingPreIntegrationTextureLookupTable != -1);
 
     m_shaderProgramVolumeRenderingPreIntegration.bind();
 
